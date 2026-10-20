@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mon programme</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--text:#1d1b19;--muted:#7a746c;--line:#e7e2d9;--accent:#5b4bdb;--sport:#e0603a;--cyber:#2f7fd1;--en:#2a9d6f;--cult:#c9922b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15141a;--card:#201f27;--text:#f0eee9;--muted:#9a95a0;--line:#33313b;--accent:#8c80ff;--sport:#f0805c;--cyber:#5aa3ee;--en:#4cc08f;--cult:#e3ae48;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15141a;--card:#201f27;--text:#f0eee9;--muted:#9a95a0;--line:#33313b;--accent:#8c80ff;--sport:#f0805c;--cyber:#5aa3ee;--en:#4cc08f;--cult:#e3ae48;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+.wrap{max-width:520px;margin:0 auto;padding:16px 14px 40px}
+h1{font-size:22px;margin:4px 0 2px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:14px}
+.nav{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.nav .t{flex:1;text-align:center;font-weight:600;text-transform:capitalize}
+button{font:inherit;color:inherit;cursor:pointer}
+.ib{border:1px solid var(--line);background:var(--card);border-radius:10px;width:40px;height:40px;font-size:18px}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px;margin-bottom:12px}
+.seg button{flex:1;border:0;background:none;padding:8px;border-radius:9px;font-size:13px;color:var(--muted)}
+.seg button.on{background:var(--accent);color:#fff;font-weight:600}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:14px}
+.d{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:6px 0 7px;text-align:center;font-size:12px}
+.d b{display:block;font-size:15px}
+.d.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.d .bar{height:4px;background:var(--line);border-radius:2px;margin:5px 6px 0;overflow:hidden}
+.d .bar i{display:block;height:100%;background:var(--en)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}
+.card h2{font-size:14px;margin:0 0 8px;display:flex;justify-content:space-between;color:var(--muted);font-weight:600}
+.task{display:flex;gap:10px;align-items:flex-start;padding:10px 4px;border-top:1px solid var(--line);width:100%;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left}
+.task:first-of-type{border-top:0}
+.box{flex:0 0 24px;height:24px;border-radius:7px;border:2px solid var(--c);display:grid;place-items:center;color:#fff;font-size:15px}
+.task.done .box{background:var(--c)}
+.task.done .lbl{text-decoration:line-through;color:var(--muted)}
+.tm{font-size:12px;color:var(--muted)}
+.info{font-size:13px;color:var(--muted);padding:6px 4px;border-top:1px dashed var(--line)}
+.pb{height:10px;background:var(--line);border-radius:6px;overflow:hidden}
+.pb i{display:block;height:100%;background:var(--c,var(--accent));transition:width .3s}
+.row{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:13px}
+.row span:first-child{width:74px}.row .pb{flex:1}.row span:last-child{width:44px;text-align:right;color:var(--muted)}
+.big{font-size:30px;font-weight:700}
+.msg{text-align:center;font-size:13px;color:var(--muted);margin-top:6px}
+.today{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:0 12px;height:40px;font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Mon programme</h1>
+  <div class="sub">Début du programme : lundi 9 novembre. Coche ce que tu as fait, ta progression se calcule toute seule.</div>
+  <div class="nav">
+    <button class="ib" id="prev" aria-label="Semaine précédente">‹</button>
+    <div class="t" id="title"></div>
+    <button class="today" id="tod">Aujourd’hui</button>
+    <button class="ib" id="next" aria-label="Semaine suivante">›</button>
+  </div>
+  <div class="seg" id="seg">
+    <button data-t="ecole">Semaine école</button>
+    <button data-t="hors">Hors cours</button>
+  </div>
+  <div class="days" id="days"></div>
+  <div class="card" id="day"></div>
+  <div class="card" id="week"></div>
+  <div class="msg" id="sync"></div>
+</div>
+<script>
+var CATS={sport:['Sport','var(--sport)'],cyber:['Cyber','var(--cyber)'],en:['Anglais','var(--en)'],cult:['Culture','var(--cult)']};
+var SCHOOL=['2026-10-19','2026-11-09','2026-11-30','2027-01-04','2027-01-25','2027-02-15','2027-03-08','2027-03-29','2027-04-19','2027-05-10','2027-05-31','2027-06-14','2027-06-21','2027-06-28','2027-07-05'];
+var DN=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+// [id, cat, heure, libellé]
+var T={
+ecole:{
+0:[['en','en','17h-17h45','Anglais (podcast ou vocabulaire)'],['cy','cyber','21h-21h45','Cyber : révision du cours du jour']],
+1:[['en','en','17h-17h45','Anglais (podcast ou vocabulaire)'],['cy','cyber','21h-21h45','Cyber : révision du cours du jour']],
+2:[['en','en','17h-17h45','Anglais (podcast ou vocabulaire)'],['cy','cyber','21h-21h45','Cyber : révision du cours du jour']],
+3:[['en','en','17h-17h45','Anglais (podcast ou vocabulaire)'],['cy','cyber','21h-21h45','Cyber : révision du cours du jour']],
+4:[['sp','sport','18h-19h','Sport A : haut du corps (1h)'],['cy','cyber','20h-21h','Cyber : labs pratiques']],
+5:[['sp','sport','14h30-15h30','Sport B avec ton frère : bas du corps (1h)'],['cy','cyber','16h30-18h','Cyber : réseau/système, labs'],['en','en','18h30-19h15','Anglais']],
+6:[['sp','sport','10h30-11h30','Sport C avec ton frère : complet + gainage (1h)'],['cu','cult','15h-16h','Culture générale : lecture ou documentaire'],['pl','cult','17h-18h','Planning de la semaine + révisions légères']]},
+hors:{
+0:[['cy','cyber','9h-11h30','Cyber : cours + labs'],['en','en','11h30-12h15','Anglais'],['cu','cult','15h-16h','Culture générale']],
+1:[['cy','cyber','9h-11h30','Cyber : cours + labs'],['en','en','11h30-12h15','Anglais'],['en2','en','15h-16h','Révision d’anglais']],
+2:[['cy','cyber','9h-11h30','Cyber : cours + labs'],['en','en','11h30-12h15','Anglais'],['cu','cult','15h-16h','Culture générale']],
+3:[['cy','cyber','9h-11h30','Cyber : cours + labs'],['en','en','11h30-12h15','Anglais'],['en2','en','15h-16h','Révision d’anglais']],
+4:[['cy','cyber','9h-12h','Cyber : projet pratique'],['en','en','45 min','Anglais'],['cu','cult','15h-16h','Culture générale'],['bi','cult','16h-17h','Bilan de la semaine'],['sp','sport','18h-19h','Sport A : haut du corps (1h)']],
+5:[['sp','sport','14h30-15h30','Sport B avec ton frère : bas du corps (1h)']],
+6:[['sp','sport','10h30-11h30','Sport C avec ton frère : complet + gainage (1h)'],['pl','cult','30 min','Préparer la semaine suivante']]}};
+var INFO=function(type,i){var a=[];
+ if(type==='ecole'&&i<5)a.push('Cours 8h45-16h45');
+ if(i<4)a.push('Babysitting 18h-19h30 (3 soirs sur 4)');
+ if(i===5)a.push('Cours de Coran 10h-12h');
+ return a;};
+var KEY='suivi-programme-v1';
+var st={c:{},w:{}};
+try{var raw=localStorage.getItem(KEY);if(raw)st=JSON.parse(raw)}catch(e){}
+st.c=st.c||{};st.w=st.w||{};
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function mon(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
+var START=new Date(2026,10,9);
+function clamp(d){d=new Date(d.getFullYear(),d.getMonth(),d.getDate());return d<START?new Date(START):d}
+var cur=clamp(new Date());
+function wtype(m){return st.w[iso(m)]||(SCHOOL.indexOf(iso(m))>-1?'ecole':'hors')}
+var TH={
+cy:['Modèle OSI : les 7 couches','TCP/IP et encapsulation','Adressage IPv4 et masques','Sous-réseaux (CIDR, VLSM)','DNS et DHCP','ARP, ICMP, ping et traceroute','TCP vs UDP, ports, handshake','Commutation : switch et VLAN','Routage statique et dynamique (OSPF)','NAT et pare-feu','Linux : navigation et commandes de base','Linux : droits, utilisateurs, groupes','Linux : processus, services (systemd), logs','Linux : réseau en ligne de commande (ip, ss, nmap)','Windows Server : installation et rôles','Active Directory : domaine, utilisateurs, OU','GPO et partages (droits NTFS)','DNS et DHCP sous Windows Server','Cryptographie : symétrique, asymétrique, hash','PKI, certificats, TLS/HTTPS','Authentification : MFA, Kerberos, mots de passe','VPN : IPsec, OpenVPN, WireGuard','Pare-feu et IDS/IPS (pfSense, Snort)','Journaux et supervision (Wireshark, SIEM)','Vulnérabilités et OWASP Top 10','Pratique : room TryHackMe réseau','Révision globale : quiz et schémas','Projet : labs Packet Tracer ou VM'],
+en:['Grammaire : présent simple vs continu','Vocabulaire : cybersécurité (network, firewall, breach...)','Écoute : podcast, compréhension','Grammaire : prétérit et present perfect','Oral : lire à voix haute et se résumer','Vocabulaire : phrasal verbs courants','Grammaire : modaux (can, must, should, might)','Écriture : e-mail professionnel court','Écoute : vidéo sous-titrée en anglais','Grammaire : conditionnels (if...)','Vocabulaire : travail et entretien','Grammaire : voix passive','TOEIC : compréhension écrite','Grammaire : comparatifs et superlatifs','Vocabulaire : faux amis','Grammaire : articles et prépositions','Écoute : dictée','Grammaire : discours rapporté','Écriture : résumé de 5 lignes d’un article','TOEIC : compréhension orale'],
+cu:['Histoire : les grandes révolutions','Géopolitique : l’Union européenne','Sciences : histoire d’Internet et de l’informatique','Économie : inflation, PIB, bases','Histoire : la Seconde Guerre mondiale','Géopolitique : États-Unis, Chine, Afrique','Philosophie : Descartes, Kant, grandes idées','Littérature : un classique résumé','Écologie et énergie','Art : grands mouvements','Actualité : revue de presse de la semaine','Cyber culture : grandes cyberattaques (WannaCry, Stuxnet)','Droit du numérique : RGPD']};
+var KIND={cy:'cy',en:'en',en2:'en',cu:'cu'};
+var PRE={cy:'Cyber : ',en:'Anglais : ',cu:'Culture : '};
+var SPORT={4:['Sport A, dos et biceps : rowing haltères, tirage, curl (1h)','Sport A, pectoraux et épaules : pompes, développé, élévations latérales (1h)'],5:['Sport B avec ton frère, jambes et fessiers : squat, fentes, hip thrust, soulevé de terre roumain (1h)'],6:['Sport C avec ton frère, complet : circuit squat, pompes, rowing + planche (1h)','Sport C avec ton frère, complet : fentes, tirage, abdos + gainage latéral (1h)']};
+function wkNum(date){var a=mon(date),b=mon(START);return Math.max(0,Math.round((a-b)/604800000))}
+function tasks(type,i,date){
+ var wk=wkNum(date),tot={},r={},out=[];
+ for(var d=0;d<7;d++)T[type][d].forEach(function(t){var k=KIND[t[0]];if(k)tot[k]=(tot[k]||0)+1});
+ for(var d=0;d<7;d++)T[type][d].forEach(function(t){
+  var k=KIND[t[0]],lb=t[3];
+  if(k){var n=r[k]||0;r[k]=n+1;lb=PRE[k]+TH[k][(wk*tot[k]+n)%TH[k].length]}
+  else if(t[0]==='sp'&&SPORT[d]){lb=SPORT[d][wk%SPORT[d].length]}
+  if(d===i)out.push({id:type+'-'+i+'-'+t[0],cat:t[1],tm:t[2],lb:lb})});
+ return out}
+function isDone(date,id){return(st.c[iso(date)]||[]).indexOf(id)>-1}
+function dayStat(date,type){var i=(date.getDay()+6)%7,ts=tasks(type,i,date),n=0;ts.forEach(function(t){if(isDone(date,t.id))n++});return{n:n,t:ts.length}}
+function render(){
+ var m=mon(cur),type=wtype(m),idx=(cur.getDay()+6)%7;
+ var end=new Date(m);end.setDate(end.getDate()+6);
+ document.getElementById('title').textContent=m.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})+' – '+end.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+ document.querySelectorAll('#seg button').forEach(function(b){b.className=b.dataset.t===type?'on':''});
+ var h='',wn=0,wt=0,cat={};
+ for(var i=0;i<7;i++){var d=new Date(m);d.setDate(m.getDate()+i);var s=dayStat(d,type);wn+=s.n;wt+=s.t;
+  tasks(type,i,d).forEach(function(t){var c=cat[t.cat]||(cat[t.cat]={n:0,t:0});c.t++;if(isDone(d,t.id))c.n++});
+  h+='<button class="d'+(i===idx?' sel':'')+'" data-i="'+i+'" style="border-width:1px"><span>'+DN[i]+'</span><b>'+d.getDate()+'</b><div class="bar"><i style="width:'+(s.t?Math.round(100*s.n/s.t):0)+'%"></i></div></button>'}
+ document.getElementById('days').innerHTML=h;
+ var dd=new Date(m);dd.setDate(m.getDate()+idx);
+ var s2=dayStat(dd,type),pc=s2.t?Math.round(100*s2.n/s2.t):0;
+ var dh='<h2><span style="text-transform:capitalize">'+dd.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})+'</span><span>'+s2.n+'/'+s2.t+'</span></h2><div class="pb" style="margin-bottom:6px"><i style="width:'+pc+'%"></i></div>';
+ INFO(type,idx).forEach(function(x){dh+='<div class="info">'+x+'</div>'});
+ tasks(type,idx,dd).forEach(function(t){var dn=isDone(dd,t.id);
+  dh+='<button class="task'+(dn?' done':'')+'" data-id="'+t.id+'" style="--c:'+CATS[t.cat][1]+'"><span class="box">'+(dn?'✓':'')+'</span><span><span class="lbl">'+t.lb+'</span><br><span class="tm">'+CATS[t.cat][0]+' · '+t.tm+'</span></span></button>'});
+ if(pc===100&&s2.t)dh+='<div class="msg">Journée complète, bravo !</div>';
+ document.getElementById('day').innerHTML=dh;
+ var wp=wt?Math.round(100*wn/wt):0;
+ var wh='<h2><span>Progression de la semaine</span><span>'+wn+'/'+wt+'</span></h2><div class="big">'+wp+'%</div><div class="pb" style="margin:6px 0 10px"><i style="width:'+wp+'%"></i></div>';
+ Object.keys(CATS).forEach(function(k){var c=cat[k];if(!c)return;wh+='<div class="row" style="--c:'+CATS[k][1]+'"><span>'+CATS[k][0]+'</span><div class="pb"><i style="width:'+Math.round(100*c.n/c.t)+'%"></i></div><span>'+c.n+'/'+c.t+'</span></div>'});
+ document.getElementById('week').innerHTML=wh;
+}
+var timer=null,dbDoc=null;
+function save(){
+ try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}
+ clearTimeout(timer);timer=setTimeout(function(){
+  if(dbDoc){dbDoc.set({data:JSON.stringify(st)}).then(function(){setSync('Progression sauvegardée sur ton compte')}).catch(function(){})}},700);}
+function setSync(t){document.getElementById('sync').textContent=t}
+document.getElementById('day').addEventListener('click',function(e){
+ var b=e.target.closest('.task');if(!b)return;
+ var k=iso(cur),a=st.c[k]||[],i=a.indexOf(b.dataset.id);
+ if(i>-1)a.splice(i,1);else a.push(b.dataset.id);
+ st.c[k]=a;save();render()});
+document.getElementById('days').addEventListener('click',function(e){
+ var b=e.target.closest('.d');if(!b)return;
+ var m=mon(cur);cur=new Date(m);cur.setDate(m.getDate()+(+b.dataset.i));render()});
+document.getElementById('seg').addEventListener('click',function(e){
+ var b=e.target.closest('button');if(!b)return;
+ st.w[iso(mon(cur))]=b.dataset.t;save();render()});
+function shift(n){var d=new Date(cur);d.setDate(d.getDate()+n);cur=clamp(d);render()}
+document.getElementById('prev').onclick=function(){shift(-7)};
+document.getElementById('next').onclick=function(){shift(7)};
+document.getElementById('tod').onclick=function(){cur=clamp(new Date());render()};
+render();
+// Synchronisation optionnelle avec le compte (sinon, sauvegarde locale)
+(async function(){
+ try{
+  if(!window.claude)return;
+  var user=await claude.use('user'),db=await claude.use('db');
+  if(!user||!db)return;
+  var id=await user.id();if(!id)return;
+  dbDoc=db.doc('data/users/'+id+'/progress/state');
+  var snap=await dbDoc.get();
+  if(snap.exists){
+   var r=JSON.parse(snap.data().data||'{}');
+   Object.keys(r.c||{}).forEach(function(k){var a=st.c[k]||[];r.c[k].forEach(function(x){if(a.indexOf(x)<0)a.push(x)});st.c[k]=a});
+   Object.keys(r.w||{}).forEach(function(k){if(!st.w[k])st.w[k]=r.w[k]});
+   try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}
+   render();
+  }
+  setSync('Sauvegarde sur ton compte activée');
+ }catch(e){}
+})();
+</script>
+</body>
+</html>
